@@ -1,5 +1,8 @@
 // Example testing sketch for various DHT humidity/temperature sensors
-// Written by ladyada, public domain
+// Oringally written by ladyada, public domain
+
+// Modified to write to SD rather than serial print and include RTC timestamps
+
 
 // REQUIRES the following Arduino libraries:
 // - DHT Sensor Library: https://github.com/adafruit/DHT-sensor-library
@@ -11,18 +14,6 @@
 #include "SdFat.h"
 #include "Sodaq_DS3231.h" // this is EnviroDIY_DS3231 folder copied and renamed Sodaq...
 
-char filename[] = "00000000.CSV";
-/* File logFile; */
-
-//year, month, date, hour, min, sec and week-day(starts from 0 and goes to 6)
-//writing any non-existent time-data may interfere with normal operation of the RTC.
-//Take care of week-day also.
-//DateTime dt(2021, 04, 10, 22, 20, 50, 5);
-
-// My attempt to go around 'set date' above and use already set rtc
-// DateTime now =rtc.now(); // get current date time
-
-
 
 #define DHTPIN 6     // Digital pin connected to the DHT sensor
 #define DHTTYPE DHT22  // DHT 22  (AM2302)
@@ -32,13 +23,14 @@ char filename[] = "00000000.CSV";
 // Connect pin 4 (on the right) of the sensor to GROUND
 // Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor
 
-//Digital pin 12 is the MicroSD slave select pin on the Mayfly
+// Digital pin 12 is the MicroSD slave select pin on the Mayfly
 const int8_t SdSsPin = 12;
 SdFat SD;
 
+// Init filename for csv
+char filename[] = "00000000.CSV";
 
-//Data header  (these lines get written to the beginning of a file when it's created)
-/* const char *loggerName = "Mayfly microSD Card Tester"; */
+// Data header  (these lines get written to the beginning of a file when it's created)
 const char *dataHeader = "SampleNumber, DT, Temp, Humidity";
 
 
@@ -46,9 +38,11 @@ int sampleinterval = 3;    //time between samples, in seconds
 int samplenum = 1;      // declare the variable "samplenum" and start with 1
 
 
+// Some pin setup for the DHT
 DHT dht(DHTPIN, DHTTYPE);
 
-void setupLogFile() { // modded to just overwrite?
+// Mod fun to just write to file, no check if exists, append data
+void setupLogFile() {
 
 	getFileName();
 	
@@ -57,20 +51,11 @@ void setupLogFile() { // modded to just overwrite?
 		{
 			Serial.println("Error: SD card failed to initialise or is missing.");
 		}
-
-  //Check if the file already exists
-  //bool oldFile = SD.exists(fileName);
-
   //Open the file in write mode
   File logFile = SD.open(filename, FILE_WRITE);
-  /* File logFile = SD.open(fileName, FILE_WRITE); */
 
   //Add header information if the file did not already exist
-  /* if (!oldFile) */
-	/* 	{ */
-  /* logFile.println(loggerName); */
   logFile.println(dataHeader);
-	/* } */
 
   //Close the file to save it
   logFile.close();
@@ -80,9 +65,9 @@ void setupLogFile() { // modded to just overwrite?
 void logData(String rec) {
 
 	getFileName();
-  //Re-open the file
+
+	//Re-open the file
   File logFile = SD.open(filename, FILE_WRITE);
-  /* File logFile = SD.open(fileName, FILE_WRITE); */
 
   //Write the CSV data
   logFile.println(rec);
@@ -95,7 +80,6 @@ void logData(String rec) {
 String createDataRecord() {
 	
   //Create a String type data record in csv format
-  //SampleNumber, Battery
   String data = "";
   data += samplenum;           //creates a string called "data", put in the sample number
   data += ",";                 //adds a comma between values
@@ -109,14 +93,14 @@ String createDataRecord() {
 	
 	// Read temperature (true means F rather than c ())
 	float t = dht.readTemperature(true);
-	// Write temperagru
+
+	// Write temperature
 	data += t;
 	data += ",";
 
 	// Read humidity
 	float h = dht.readHumidity();
-	// Write Humidity
-	data += h;
+	data += h;  	// Write Humidity
 
 	// Wrap up
 	samplenum++;   //increment the sample number
@@ -139,9 +123,6 @@ void setup() {
     abort();
   }
 
-	// set initial time from top of file
-	//rtc.setDateTime(dt);
-
   //Initialise log file
   setupLogFile();
 
@@ -159,7 +140,7 @@ void setup() {
 
 void getFileName() {
 	DateTime now = rtc.now();
-  // Turns file_today_name into date.txt format
+	// Turns file_today_name into date.txt format
   sprintf(filename, "%02d%02d%02d.csv", now.year(), now.month(), now.date());
 }
 
