@@ -104,7 +104,7 @@ String createDataRecord() {
 
 	// Wrap up
 	samplenum++;   //increment the sample number
-	delay(3000);  // <--- This one.. uSec gap between readings
+	delay(30000);  // <--- This one.. uSec gap between readings
   return data;
 }
 
