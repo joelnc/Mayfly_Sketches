@@ -85,10 +85,10 @@ String createDataRecord() {
   data += ",";                 //adds a comma between values
 
 	// Add datestring
-	char buf1[22];
+	char tempDt[22];
 	DateTime now = rtc.now();
-	sprintf(buf1, "%04d-%02d-%02d %02d:%02d:%02d",  now.year(), now.month(), now.date(), now.hour(), now.minute(), now.second());
-	data += buf1;
+	sprintf(tempDt, "%04d-%02d-%02d %02d:%02d:%02d",  now.year(), now.month(), now.date(), now.hour(), now.minute(), now.second());
+	data += tempDt;
 	data += ",";	
 	
 	// Read temperature (true means F rather than c ())
@@ -104,7 +104,7 @@ String createDataRecord() {
 
 	// Wrap up
 	samplenum++;   //increment the sample number
-	delay(1000);
+	delay(3000);  // <--- This one.. uSec gap between readings
   return data;
 }
 
@@ -113,27 +113,14 @@ void setup() {
 
 	Wire.begin();
 	rtc.begin();
-#ifndef ESP8266
-  while (!Serial); // wait for serial port to connect. Needed for native USB
-#endif
-	
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    Serial.flush();
-    abort();
-  }
 
   //Initialise log file
   setupLogFile();
 
-  //Echo the data header to the serial connection
-  Serial.println(dataHeader);
 	//DHT setup
 	pinMode(22, OUTPUT);      // pin D22 is the enable line for the Mayfly's switched 3.3/5v power lines
 	digitalWrite(22, HIGH);   // set this pin high and leave it on for the rest of the sketch
 	delay(2000);
-	Serial.begin(57600);
-	Serial.println("Digital Humidity/Temperature");
 
 	dht.begin();
 }
@@ -152,39 +139,5 @@ void loop() {
 
   //Save the data record to the log file
   logData(dataRec);
-
-	// Reading temperature or humidity takes about 250 milliseconds
-	// Sensor readings may also be up to 2 seconds old
-/* 	delay(200); */
-/* 	float h = dht.readHumidity(); */
-/* 	float t = dht.readTemperature(true); */
-
-/* 	// check if returns are valid, if they are NaN (not a number) then something went wrong */
-/* 	if (isnan(t) || isnan(h)) */
-/*     { */
-/* 			Serial.println("Failed to read from DHT"); */
-/*     } */
-/* 	else */
-/*     { */
-/* 			Serial.print("Stamp: "); */
-/* 			Serial.print(now.year(), DEC); */
-/* 			Serial.print('-'); */
-/* 			Serial.print(now.month(), DEC); */
-/* 			Serial.print('-'); */
-/* 			Serial.print(now.date(), DEC); */
-/* 			Serial.print(" "); */
-/* 			Serial.print(now.hour(), DEC); */
-/* 			Serial.print(':'); */
-/* 			Serial.print(now.minute(), DEC); */
-/* 			Serial.print(':'); */
-/* 			Serial.print(now.second(), DEC); /// just printing 1s? */
-/* 			Serial.print(" %\t"); */
-/* 			Serial.print("HumidityYC: "); */
-/* 			Serial.print(h); */
-/* 			Serial.print(" %\t"); */
-/* 			Serial.print("TemperatureYA: "); */
-/* 			Serial.print(t); */
-/* 			Serial.println(" *F"); */
-/*     } */
 
 } 
