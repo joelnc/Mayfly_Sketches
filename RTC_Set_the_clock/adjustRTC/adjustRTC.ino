@@ -9,9 +9,10 @@ char weekDay[][4] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 //year, month, date, hour, min, sec and week-day(starts from 0 and goes to 6)
 //writing any non-existent time-data may interfere with normal operation of the RTC.
 //Take care of week-day also.
-// Yeah, so set the current date time here and upload sketch as close to that
-// second as possible.  4/19/2021 set is 4 seconds slow, good enough
-DateTime dt(2021, 04, 19, 18, 11, 0, 0); //0 for monday?
+
+// So, set the current date time here and upload sketch as close to that
+// second as possible.  Last set 19-Apr-2021 18:33:30.  Got it within 2 seconds.
+DateTime dt(2021, 04, 19, 18, 33, 30, 1); //0 for Sunday, 1 for Mon, etc
 
 
 void setup ()

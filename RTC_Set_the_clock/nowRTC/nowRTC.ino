@@ -1,5 +1,6 @@
 // Date and time functions using RX8025 RTC connected via I2C and Wire lib
 // Copy of enviro lib 'now' sketch to test if clock time from adjust sketch works
+
 // So after setting clock via adjustRTC, turn off, disconnect wait a few minutes
 // .. then run this to confirm it retained time via button battery 
 #include <Wire.h>
